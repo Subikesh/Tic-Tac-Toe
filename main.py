@@ -1,6 +1,7 @@
 # Tic tac toe game
 import math
 import copy
+import time
 
 class Game:
     def __init__(self):
@@ -10,6 +11,7 @@ class Game:
                       [0, 0, 0],
                       [0, 0, 0]]
         self.turn = 0
+        self.count = 0
 
     # Function to display the board
     def display_board(self):
@@ -85,6 +87,7 @@ class Game:
         winner = self.is_game_over(board)
         # Here we add it with depth, to give more preference to win it in smaller depth
         if winner:
+            self.count += 1
             if winner == self.turn+1:
                 return 10 - depth
             elif winner == (~self.turn & 1)+1:
@@ -125,14 +128,13 @@ class Game:
                 return bestpos
             return min_eval
 
-
-
+# Helper function to check if game is over or not
 def game_check(game):
     status = game.is_game_over(game.board)
     if status == 1:
-        print("X Wins. Congratulations!!")
+        print("X Wins.")
     elif status == 2:
-        print("Y wins. Congratulations!!")
+        print("Y wins.")
     elif status == -1:
         print("It's a draw. Well Played")
     if status:
@@ -141,48 +143,67 @@ def game_check(game):
     else:
         return True
 
-
-game = Game()
-
-# Two Player Game
-# while True:
-#     game.display_board()
-#     print(('X' if game.turn == 0 else 'O') + "'s position :", end='')
-#     try:
-#         pos = int(input())
-#     except ValueError:
-#         break
-#     if not game.make_move(game.board, pos, game.turn):
-#         print('Element already present in the given position. \nPlease select another position')
-#     status = game.is_game_over()
-#     if status == 1:
-#         print("X Wins. Congratulations!!")
-#     elif status == 2:
-#         print("Y wins. Congratulations!!")
-#     elif status == -1:
-#         print("It's a draw. Well Played")
-#     if status:
-#         game.display_board()
-#         break
-
-# Single Player game
+# Main Function
 while True:
-    game.display_board()
-    print(('X' if game.turn == 0 else 'O') + "'s position :", end='')
-    try:
-        pos = int(input())
-    except ValueError:
-        break
-    temp = game.make_move(game.board, pos, game.turn)
-    if temp == -1:
-        print('Element already present in the given position. \nPlease select another position')
-        continue
-    game.turn = temp
-    # Check before AI makes its move
-    if game_check(game):
-        game.turn = game.make_move(game.board, game.get_next_move(0, game.board, turn=game.turn), game.turn)
+    print('\n\n' + '=' * 10 + "Main Menu" + "=" * 10+ '\n')
+    print('1. Single Player Game\n2. Two-Player Game\n3. Exit')
+    opt = int(input())
+
+    if opt == 1:
+        # Single Player game
+        game = Game()
+        print("Would you like to play first? y/n")
+        play = input().lower()
+        while True:
+            if play == 'n':                
+                game.count = 0
+                t1 = time.time()
+                move = game.get_next_move(0, game.board, turn=game.turn)
+                game.turn = game.make_move(game.board, move, game.turn)
+                t2 = time.time()
+                print("My move :", move, '\t Combinations compared', game.count, end='\t')
+                print("Time elapsed :{:.3f}".format(t2-t1))
+                if not game_check(game):
+                    break
+            play = 'n'
+            game.display_board()
+            print(('X' if game.turn == 0 else 'O') + "'s position :", end='')
+            try:
+                pos = int(input())
+            except ValueError:
+                break
+            temp = game.make_move(game.board, pos, game.turn)
+            if temp == -1:
+                print('Element already present in the given position. \nPlease select another position')
+                continue
+            game.turn = temp
+            if not game_check(game):
+                break
+
+    elif opt == 2:
+        # Two Player Game
+        game = Game()
+        while True:
+            game.display_board()
+            print(('X' if game.turn == 0 else 'O') + "'s position :", end='')
+            try:
+                pos = int(input())
+            except ValueError:
+                break
+            temp = game.make_move(game.board, pos, game.turn)
+            if temp == -1:
+                print('Element already present in the given position. \nPlease select another position')
+                continue
+            game.turn = temp
+            check = game_check(game)
+            if not check:
+                if check != -1:
+                    print("Congratulations!")
+                break
+
     else:
         break
-    # Check after AI makes its move
-    if not game_check(game):
-        break
+    
+    time.sleep(1)
+    print("\nThank You For Playing!")
+    time.sleep(1.5)
